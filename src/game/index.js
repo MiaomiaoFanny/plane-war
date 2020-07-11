@@ -146,21 +146,41 @@ const moveEnemy = enemy => {
     }
 }
 
-// 我方发射子弹
+// 我方发射子弹 按住空格键不放, 持续发子弹
 export const selfBulletShoot = (plane, selfBullets) => {
-  const handleAttack = e => {
+  const attackInterval = 10
+  let isAttacking = false, attackTime = 0
+  const handleTicker = () => {
     if (selfBullets.length >= MaxSelfBullet) return
-    if(e.code === 'Space') {
-      let x = plane.x + (plane.width / 2 - bulletWidth / 2.3)
-      let y = plane.y - bulletHeight / 2.5
-      selfBullets.push({
-        x, y, width: bulletWidth, height: bulletHeight
-      })
+    if (isAttacking && attackTime >= attackInterval) {
+      attackTime = 0
+      addBullet(plane, selfBullets)
     }
+    attackTime++
   }
-  handleKeydown(handleAttack)
+  handleKeydown({
+    Space() {
+      if (!isAttacking) {
+        attackTime = attackInterval
+      }
+      isAttacking = true
+    }
+  })
+  handleKeyup({
+    Space() {
+      isAttacking = false
+    }
+  })
+  addTicker(handleTicker)
 }
 
+const addBullet = (plane, selfBullets) => {
+  let x = plane.x + (plane.width / 2 - bulletWidth / 2.3)
+  let y = plane.y - bulletHeight / 2.5
+  selfBullets.push({
+    x, y, width: bulletWidth, height: bulletHeight
+  })
+}
 // 我方子弹移动
 export const selfBulletMove = (selfBullets, enemies, score) => {
   const speed = 6
