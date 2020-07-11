@@ -1,7 +1,6 @@
-import { defineComponent, h, onMounted, onUnmounted, reactive } from "@vue/runtime-core";
-import { getGame } from "../Game";
-import { hit } from '../utils/index'
-
+import { defineComponent, h, reactive } from "@vue/runtime-core";
+import { hittingDetect, handleKeydown, addTicker } from '../utils'
+import { pages } from '../router'
 /* @todo:
 1. 正確碰撞计数
 2. 每秒新增小球
@@ -124,13 +123,11 @@ export default defineComponent({
 })
 
 const useKeyboard = ctx => {
-  const handleKeydown = e => {
-    if (e.code === 'Escape') {
-      ctx.emit('changePage', 'StartPage')
+  handleKeydown({
+    Escape() {
+      ctx.emit('changePage', pages.StartPage)
     }
-  }
-  onMounted(() => { window.addEventListener('keydown', handleKeydown) })
-  onUnmounted(() => { window.removeEventListener('keydown', handleKeydown) })
+  })
 }
 
 const useMoveBalls = (balls) => {
@@ -138,7 +135,6 @@ const useMoveBalls = (balls) => {
 }
 
 const moveBall = (ball, id, balls) => {
-  let ticker
   const stageWidth = 750, stageHeight = 1080
   const moveBall = () => {
     const hit = detectHit(ball, id, balls)
@@ -158,8 +154,7 @@ const moveBall = (ball, id, balls) => {
       else { ball.y-=ball.ySpeed + hit.y }
     }
   }
-  onMounted(() => { ticker = getGame().ticker.add(moveBall) })
-  onUnmounted(() => { ticker.remove(moveBall) })
+  addTicker(moveBall)
 }
 
 const detectHit = (ball, id, balls) => {
@@ -167,7 +162,7 @@ const detectHit = (ball, id, balls) => {
   for(let i = balls.length - 1; i >= 0; i--) {
     if(id === i) { continue }
     const otherBall = balls[i]
-    if (hit(otherBall, ball)) {
+    if (hittingDetect(otherBall, ball)) {
       ball.xDir = !ball.xDir
       ball.yDir = !ball.yDir
       ball.hit++

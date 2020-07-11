@@ -1,10 +1,15 @@
-import { defineComponent, h, ref } from "@vue/runtime-core";
-import MapImg from "../../assets/map.jpg";
-import { getGame } from "../Game";
+import { defineComponent, h, ref } from "@vue/runtime-core"
+import MapImg from "../../assets/map.jpg"
+import { addTicker } from "../utils"
+import { config } from "../game"
+
+const { stageHeight, mapScrollSpeed } = config
 
 export default defineComponent({
   setup() {
-    const { mapY1, mapY2 } = useMapScroll()
+    const mapY1 = ref(0)
+    const mapY2 = ref(-stageHeight)
+    useMapScroll(mapY1, mapY2)
     return {
       mapY1,
       mapY2,
@@ -19,23 +24,17 @@ export default defineComponent({
   }
 })
 
-const useMapScroll = () => {
-    // 让地图滚动起来
-    const MapHeight = 1080
-    const mapY1 = ref(0)
-    const mapY2 = ref(-MapHeight)
-    const speed = 5
-    getGame().ticker.add(() => {
-      mapY1.value += speed
-      mapY2.value += speed
-      if (mapY1.value >= MapHeight) {
-        mapY1.value = -MapHeight
-      }
-      if (mapY2.value >= MapHeight) {
-        mapY2.value = -MapHeight
-      }
-    })
-    return {
-      mapY1, mapY2
+// 让地图滚动起来
+const useMapScroll = (mapY1, mapY2) => {
+  const scroll = () => {
+    mapY1.value += mapScrollSpeed
+    mapY2.value += mapScrollSpeed
+    if (mapY1.value >= stageHeight) {
+      mapY1.value = -stageHeight
     }
+    if (mapY2.value >= stageHeight) {
+      mapY2.value = -stageHeight
+    }
+  }
+  addTicker(scroll)
 }

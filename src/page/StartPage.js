@@ -1,19 +1,19 @@
-import { defineComponent, h, onMounted, onUnmounted } from "@vue/runtime-core";
+import { defineComponent, h } from "@vue/runtime-core";
 import StartPageImg from '../../assets/start_page.jpg'
 import StartBtn from '../component/StartBtn'
+import { pages } from '../router';
+import { handleKeydown } from '../utils';
 
 export default defineComponent({
   setup(_, ctx) {
-    const handleEnter = e => {
-      console.log(e.code)
-      if (e.code === 'Enter') {
-        ctx.emit('changePage', 'GamePage')
-      } else if (e.code === 'ShiftRight' || e.code === 'ShiftLeft') {
-        ctx.emit('changePage', 'BallPage')
-      }
-    }
-    onMounted(() => { window.addEventListener('keydown', handleEnter) })
-    onUnmounted(() => { window.removeEventListener('keydown', handleEnter) })
+    handleKeydown({
+      Enter() {
+        ctx.emit('changePage', pages.GamePage)
+      },
+      Shift() {
+        ctx.emit('changePage', pages.BallPage)
+      },
+    })
   },
   render(ctx) {
     const vnode = h('Container', [
@@ -22,7 +22,7 @@ export default defineComponent({
         x: 225,
         y: 510,
         onClick() {
-          ctx.$emit('changePage', 'GamePage')
+          ctx.$emit('changePage', pages.GamePage)
         }
       }),
     ])

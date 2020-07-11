@@ -1,16 +1,16 @@
-import { defineComponent, h, onMounted, onUnmounted } from "@vue/runtime-core";
+import { defineComponent, h } from "@vue/runtime-core";
 import RestartBtn from '../component/RestartBtn'
 import EndPageImg from '../../assets/end_page.jpg'
+import { pages } from '../router';
+import { handleKeydown } from '../utils';
 
 export default defineComponent({
   setup(_, ctx) {
-    const handleEnter = e => {
-      if (e.code === 'Enter') {
-        ctx.emit('changePage', 'GamePage')
+    handleKeydown({
+      Enter() {
+        ctx.emit('changePage', pages.GamePage)
       }
-    }
-    onMounted(() => { window.addEventListener('keydown', handleEnter) })
-    onUnmounted(() => { window.removeEventListener('keydown', handleEnter) })
+    })
   },
   render(ctx) {
     const vnode = h('Container', [
@@ -19,7 +19,7 @@ export default defineComponent({
         x: 225,
         y: 510,
         onClick() {
-          ctx.$emit('changePage', 'GamePage')
+          ctx.$emit('changePage', pages.GamePage)
         }
       }),
     ])
