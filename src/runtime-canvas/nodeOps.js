@@ -1,4 +1,6 @@
 import { Graphics, Text, Container, Sprite } from 'pixi.js'
+/* 基本操作: 创建元素, 设置文本... */
+
 export default {
   createElement(tag) {
     // console.log('[createElement]', tag)

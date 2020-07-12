@@ -1,5 +1,7 @@
 import { Texture } from 'pixi.js'
 
+/* 属性更新操作 */
+
 const patchProp = (el, key, preValue, nextValue) => {
   // console.log('[patchProp]', key, preValue, nextValue)
   switch (key) {

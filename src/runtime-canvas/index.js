@@ -2,16 +2,27 @@ import { createRenderer } from '@vue/runtime-core'
 import nodeOps from './nodeOps'
 import patchProp from './patchProp'
 
-const renderOptions = {
+/* 自定义canvas渲染操作选项 */
+const rendererOptions = {
   patchProp,
   ...nodeOps
 }
-const renderer = createRenderer(renderOptions)
+
+// canvas 渲染器
+let renderer
+
+function ensureRenderer() {
+  return renderer || (renderer = createRenderer(rendererOptions))
+}
+
 // console.log('renderer', renderer)
 
-export function createApp(rootComponent) {
-  const app = renderer.createApp(rootComponent)
+export const render = ((...args) => {
+  ensureRenderer().render(...args)
+})
+
+export const createApp = (...args) => {
+  const app = ensureRenderer().createApp(...args)
   // console.log('app', app)
-  // console.log('rootComponent', rootComponent)
   return app
 }
