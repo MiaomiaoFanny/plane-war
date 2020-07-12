@@ -10,7 +10,10 @@ const {
   enemyWidth, enemyHeight,
   MaxSelfBullet, MaxEnemyBullet,
   MaxEnemyPlane, enemyShowInterval,
-  enemyMoveSpeedX, enemyMoveSpeedY
+  enemyMoveSpeedX, enemyMoveSpeedY,
+  EnemyChangeDirInterval, enemyMaxAttacked,
+  selfPlaneSpeed,
+  selfBulletSpeed, enemyBulletSpeed
 } = config
 const game = new PIXI.Application({
   width: stageWidth,
@@ -50,7 +53,6 @@ export const handlePlaneShowUp = (plane) => {
 export const handlePlaneMove = (plane) => {
     // 让飞机移动
   let dir = {
-    speed: 5,
     UpDown: null,
     LeftRight: null,
     lastCode: null,
@@ -89,15 +91,15 @@ export const handlePlaneMove = (plane) => {
 const moveSelfPlane = (plane, dir) => {
   // console.log('[in ticker] movePlane')
   if (dir.LeftRight === 'ArrowLeft' && plane.x >= dir.minX) {
-    plane.x -= dir.speed
+    plane.x -= selfPlaneSpeed
   } else if (dir.LeftRight === 'ArrowRight' && plane.x <= dir.maxX) {
-    plane.x += dir.speed
+    plane.x += selfPlaneSpeed
   }
 
   if (dir.UpDown === 'ArrowUp' && plane.y >= dir.minY) {
-    plane.y -= dir.speed
+    plane.y -= selfPlaneSpeed
   } else if (dir.UpDown === 'ArrowDown' && plane.y <= dir.maxY) {
-    plane.y += dir.speed
+    plane.y += selfPlaneSpeed
   }
 }
 
@@ -114,6 +116,7 @@ export const handleEnemyShowUp = (enemies) => {
       y: minY + Math.random() * (maxY - minY),
       width: enemyWidth,
       height: enemyHeight,
+      attacked: 0,
     }
     enemies.push(pos)
   }
@@ -124,26 +127,34 @@ export const handleEnemyShowUp = (enemies) => {
 export const handleEnemyMove = (enemies) => {
   const moveEnemies = () => {
     // console.log('[in ticker] moveEnemies')
-    enemies.forEach(moveEnemy)
+    enemies.forEach(enemy => {
+      moveEnemy(enemy)
+    })
   }
   addTicker(moveEnemies)
 }
 const moveEnemy = enemy => {
-    const minX = -(enemy.width / 2), maxX = stageWidth - enemy.width / 2
-    const minY = -(enemy.height / 2), maxY = stageHeight - enemy.height / 2
-    if(enemy.x <= minX) { enemy.x += enemyMoveSpeedX; enemy.xDir = true }
-    else if(enemy.x >= maxX) { enemy.x -= enemyMoveSpeedX; enemy.xDir = false}
-    else {
-      if (enemy.xDir === true) { enemy.x  += enemyMoveSpeedX }
-      else { enemy.x -= enemyMoveSpeedX }
+  enemy.recordTime = enemy.recordTime || 0
+  enemy.recordTime++
+  const minX = -(enemy.width / 2), maxX = stageWidth - enemy.width / 2
+  const minY = -(enemy.height / 2), maxY = stageHeight - enemy.height / 2
+  if(enemy.x <= minX) { enemy.x += enemyMoveSpeedX; enemy.xDir = true }
+  else if(enemy.x >= maxX) { enemy.x -= enemyMoveSpeedX; enemy.xDir = false}
+  else {
+    if (enemy.recordTime >= EnemyChangeDirInterval) {
+      enemy.recordTime = 0
+      enemy.xDir = Math.random() > 0.5
     }
+    if (enemy.xDir === true) { enemy.x  += enemyMoveSpeedX }
+    else { enemy.x -= enemyMoveSpeedX }
+  }
 
-    if(enemy.y <= minY) { enemy.y += enemyMoveSpeedY; enemy.yDir = false}
-    else if(enemy.y >= maxY) { enemy.y -= enemyMoveSpeedY; enemy.yDir = true}
-    else {
-      if (enemy.yDir === false) { enemy.y += enemyMoveSpeedY }
-      else { enemy.y -= enemyMoveSpeedY }
-    }
+  if(enemy.y <= minY) { enemy.y += enemyMoveSpeedY; enemy.yDir = false}
+  else if(enemy.y >= maxY) { enemy.y -= enemyMoveSpeedY; enemy.yDir = true}
+  else {
+    if (enemy.yDir === false) { enemy.y += enemyMoveSpeedY }
+    else { enemy.y -= enemyMoveSpeedY }
+  }
 }
 
 // 我方发射子弹 按住空格键不放, 持续发子弹
@@ -183,7 +194,6 @@ const addBullet = (plane, selfBullets) => {
 }
 // 我方子弹移动
 export const selfBulletMove = (selfBullets, enemies, score) => {
-  const speed = 6
   const shoot = () => {
     const len = selfBullets.length
     // console.log('[in ticker] shoot selfBullets count', len)
@@ -192,9 +202,8 @@ export const selfBulletMove = (selfBullets, enemies, score) => {
       if (bullet.y < -bullet.height) { // 到达顶部
         selfBullets.splice(i, 1)
       } else {
-        bullet.y -= speed
-        if (detectSelfBulletTouchEnemyPlane(bullet, enemies)) { // 检测碰撞
-          score.value += 2
+        bullet.y -= selfBulletSpeed
+        if (detectSelfBulletTouchEnemyPlane(bullet, enemies, score)) { // 检测碰撞
           selfBullets.splice(i, 1)
         }
       }
@@ -220,7 +229,6 @@ export const enemyBulletShoot = (enemies, enemyBullets) => {
 
 // 敌方子弹移动
 export const enemyBulletMove = (enemyBullets, selfBullets, score) => {
-  const speed = 6
   const shoot = () => {
     const len = enemyBullets.length
     // console.log('[in ticker] shoot enemyBullets count', len)
@@ -229,7 +237,7 @@ export const enemyBulletMove = (enemyBullets, selfBullets, score) => {
       if (bullet.y > stageHeight) { // 到达底部
         enemyBullets.splice(i, 1)
       } else {
-        bullet.y += speed
+        bullet.y += enemyBulletSpeed
         if (detectEnemyBulletTouchSelfBullets(bullet, selfBullets, score)) { // 检测碰撞
           enemyBullets.splice(i, 1)
         }
@@ -254,7 +262,7 @@ export const detectGameOver = (plane, enemies, enemyBullets, gameover) => {
 
 /* 碰撞检测 */
 // 我方子弹 >> 敌军战机 (我方子弹循环中检测)
-const detectSelfBulletTouchEnemyPlane = (bullet, enemies) => {
+const detectSelfBulletTouchEnemyPlane = (bullet, enemies, score) => {
   const len = enemies.length
   // console.log('[detectSelfBulletTouchEnemyPlane] bullet', bullet, 'enemies count', len)
   for (let i = len - 1; i >= 0; i--) {
@@ -265,8 +273,12 @@ const detectSelfBulletTouchEnemyPlane = (bullet, enemies) => {
       width: enemy.width,
       height: enemy.height,
     })) {
+      enemy.attacked++
       // console.log('Hiting!!!!!!!! > 1 我方子弹 >> 敌军战机')
-      enemies.splice(i, 1)
+      if(enemy.attacked >= enemyMaxAttacked) {
+        score.value+=3
+        enemies.splice(i, 1)
+      }
       return true
     }
   }

@@ -3,7 +3,8 @@ import {router, pages} from "./router";
 
 export default defineComponent({
   setup() {
-    const currentPageName = ref(pages.StartPage)
+    const currentPageName = ref(pages.GamePage)
+    // const currentPageName = ref(pages.StartPage)
     const currentPage = computed(() => router[currentPageName.value])
     return {
       currentPageName,
