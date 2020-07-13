@@ -1,14 +1,14 @@
 import { defineComponent, h } from "@vue/runtime-core";
 import RestartBtn from '../component/RestartBtn'
 import EndPageImg from '../../assets/end_page.jpg'
-import { pages } from '../router';
+import { PAGE } from '../page'
 import { handleKeydown } from '../utils';
 
 export default defineComponent({
   setup(_, ctx) {
     handleKeydown({
       Enter() {
-        ctx.emit('changePage', pages.GamePage)
+        ctx.emit('changePage', PAGE.GamePage)
       }
     })
   },
@@ -19,7 +19,7 @@ export default defineComponent({
         x: 225,
         y: 510,
         onClick() {
-          ctx.$emit('changePage', pages.GamePage)
+          ctx.$emit('changePage', PAGE.GamePage)
         }
       }),
     ])

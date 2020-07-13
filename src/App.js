@@ -1,11 +1,10 @@
 import { defineComponent, h, ref, computed } from '@vue/runtime-core'
-import {router, pages} from "./router";
+import {getPageComponent, PAGE} from './page';
 
 export default defineComponent({
   setup() {
-    const currentPageName = ref(pages.GamePage)
-    // const currentPageName = ref(pages.StartPage)
-    const currentPage = computed(() => router[currentPageName.value])
+    const currentPageName = ref(PAGE.StartPage)
+    const currentPage = computed(() => getPageComponent(currentPageName.value))
     return {
       currentPageName,
       currentPage,

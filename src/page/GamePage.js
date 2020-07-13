@@ -1,6 +1,6 @@
 import { defineComponent, h, reactive, ref } from "@vue/runtime-core"
 import { Map, RestartBtn, Plane, Enemy, BulletEnemy, BulletSelf } from '../component' 
-import { pages } from '../router';
+import { PAGE } from '../page'
 import {
   handlePlaneShowUp,
   handlePlaneMove,
@@ -51,7 +51,7 @@ export default defineComponent({
       ...renderItems(ctx.enemyBullets, BulletEnemy),
       h(RestartBtn, { x: 550, y: 10, width: 160, height: 50,
         onClick() {
-          ctx.$emit('changePage', pages.RestartPage)
+          ctx.$emit('changePage', PAGE.RestartPage)
         }
       }),
       h('circle', {
@@ -65,7 +65,7 @@ export default defineComponent({
 const useKeyboard = (ctx) => {
   handleKeydown({
     Escape() {
-      ctx.emit('changePage', pages.StartPage)
+      ctx.emit('changePage', PAGE.StartPage)
     }
   })
 }
@@ -106,6 +106,6 @@ const useEnemyAttack = (enemies, enemyBullets, selfBullets, score) => {
 // 监测游戏结束 碰撞检测
 const useDetectGameOver = (plane, enemies, enemyBullets, ctx) => {
   detectGameOver(plane, enemies, enemyBullets, () => {
-    ctx.emit('changePage', pages.RestartPage)
+    ctx.emit('changePage', PAGE.RestartPage)
   })
 }

@@ -1,6 +1,6 @@
 import { defineComponent, h, reactive } from "@vue/runtime-core";
 import { hittingDetect, handleKeydown, addTicker } from '../utils'
-import { pages } from '../router'
+import { PAGE } from '../page'
 /* @todo:
 1. 正確碰撞计数
 2. 每秒新增小球
@@ -125,7 +125,7 @@ export default defineComponent({
 const useKeyboard = ctx => {
   handleKeydown({
     Escape() {
-      ctx.emit('changePage', pages.StartPage)
+      ctx.emit('changePage', PAGE.StartPage)
     }
   })
 }
