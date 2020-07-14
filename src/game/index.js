@@ -2,11 +2,12 @@
 
 import * as PIXI from 'pixi.js'
 import { handleKeydown, handleKeyup, hittingDetect, addInterval, addTicker } from '../utils'
+import keyboardMovePlane from './keyboardMovePlane'
 import config from './config'
 const {
   stageWidth, stageHeight,
   bulletWidth, bulletHeight,
-  planeHeight,
+  planeWidth, planeHeight,
   enemyWidth, enemyHeight,
   MaxSelfBullet, MaxEnemyBullet,
   MaxEnemyPlane, enemyShowInterval,
@@ -21,6 +22,8 @@ const game = new PIXI.Application({
 })
 // console.log('game', game)
 document.body.appendChild(game.view)
+document.body.style.background = "#343434"
+game.renderer.backgroundColor = 0x061639;
 export {
   config
 }
@@ -51,56 +54,9 @@ export const handlePlaneShowUp = (plane) => {
 
 // 我方战机丝滑移动
 export const handlePlaneMove = (plane) => {
-    // 让飞机移动
-  let dir = {
-    UpDown: null,
-    LeftRight: null,
-    lastCode: null,
-    minX: -plane.width * 0.6,
-    maxX: stageWidth - plane.width * 0.5,
-    minY: 0,
-    maxY: stageHeight - plane.height * 0.4,
-  }
-  const recordMove = (e) => {
-    dir.lastCode = e.code
-    switch (e.code) {
-      case 'ArrowUp': case 'ArrowDown':
-        dir.UpDown = e.code
-        break
-      case 'ArrowLeft': case 'ArrowRight':
-        dir.LeftRight = e.code
-        break
-      default:
-        break;
-    }
-  }
-  const clearMove = () => {
-    switch (dir.lastCode) {
-      case 'ArrowUp': case 'ArrowDown':
-        dir.UpDown = null
-        break
-      case 'ArrowLeft': case 'ArrowRight':
-        dir.LeftRight = null
-        break
-    }
-  }
-  handleKeydown(recordMove)
-  handleKeyup(clearMove)
-  addTicker(() => moveSelfPlane(plane, dir))
-}
-const moveSelfPlane = (plane, dir) => {
-  // console.log('[in ticker] movePlane')
-  if (dir.LeftRight === 'ArrowLeft' && plane.x >= dir.minX) {
-    plane.x -= selfPlaneSpeed
-  } else if (dir.LeftRight === 'ArrowRight' && plane.x <= dir.maxX) {
-    plane.x += selfPlaneSpeed
-  }
-
-  if (dir.UpDown === 'ArrowUp' && plane.y >= dir.minY) {
-    plane.y -= selfPlaneSpeed
-  } else if (dir.UpDown === 'ArrowDown' && plane.y <= dir.maxY) {
-    plane.y += selfPlaneSpeed
-  }
+  const {x, y} = keyboardMovePlane(plane.x, plane.y, selfPlaneSpeed, 0, stageHeight - planeHeight / 2, -planeWidth / 2, stageWidth - planeWidth / 2)
+  plane.x = x
+  plane.y = y
 }
 
 // 敌方战机随机出场
