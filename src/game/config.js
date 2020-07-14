@@ -11,7 +11,7 @@ module.exports = {
   MaxSelfBullet: 10,
   MaxEnemyBullet: 50,
   MaxEnemyPlane: 20,
-  enemyShowInterval: 3000,
+  enemyShowInterval: 1500,
   enemyMaxAttacked: 2,
   enemyMoveSpeedY: 0.3,
   enemyMoveSpeedX: 0.3,

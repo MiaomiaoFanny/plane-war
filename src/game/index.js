@@ -2,7 +2,7 @@
 
 import * as PIXI from 'pixi.js'
 import { handleKeydown, handleKeyup, hittingDetect, addInterval, addTicker } from '../utils'
-import keyboardMovePlane from './keyboardMovePlane'
+import keyboardMovePlane, { isReachEdge } from './keyboardMovePlane'
 import config from './config'
 const {
   stageWidth, stageHeight,
@@ -65,14 +65,17 @@ export const handleEnemyShowUp = (enemies) => {
     if (enemies.length >= MaxEnemyPlane) {
       return
     }
-    const minX = enemyWidth * -0.5, maxX = stageWidth - enemyWidth * 0.5
+    const minX = -(enemyWidth / 2), maxX = stageWidth - enemyWidth / 2
     const minY = enemyHeight * -0.7, maxY = enemyHeight * 0.3
     const pos = {
       x: minX + Math.random() * (maxX - minX),
       y: minY + Math.random() * (maxY - minY),
       width: enemyWidth,
       height: enemyHeight,
+      xDir: Math.random() > 0.5 ? 1 : -1,
+      yDir: Math.random() > 0.5 ? 1 : -1,
       attacked: 0,
+      recordTime: 0,
     }
     enemies.push(pos)
   }
@@ -81,6 +84,8 @@ export const handleEnemyShowUp = (enemies) => {
 
 // 敌机随机移动
 export const handleEnemyMove = (enemies) => {
+  const minX = -(enemyWidth / 2), maxX = stageWidth - enemyWidth / 2
+  const minY = -(enemyHeight / 2), maxY = stageHeight - enemyHeight / 2
   const moveEnemies = () => {
     // console.log('[in ticker] moveEnemies')
     enemies.forEach(enemy => {
@@ -88,28 +93,22 @@ export const handleEnemyMove = (enemies) => {
     })
   }
   addTicker(moveEnemies)
-}
-const moveEnemy = enemy => {
-  enemy.recordTime = enemy.recordTime || 0
-  enemy.recordTime++
-  const minX = -(enemy.width / 2), maxX = stageWidth - enemy.width / 2
-  const minY = -(enemy.height / 2), maxY = stageHeight - enemy.height / 2
-  if(enemy.x <= minX) { enemy.x += enemyMoveSpeedX; enemy.xDir = true }
-  else if(enemy.x >= maxX) { enemy.x -= enemyMoveSpeedX; enemy.xDir = false}
-  else {
-    if (enemy.recordTime >= EnemyChangeDirInterval) {
-      enemy.recordTime = 0
-      enemy.xDir = Math.random() > 0.5
+  const moveEnemy = enemy => {
+    enemy.recordTime++
+    if (isReachEdge([minX, maxX], enemy.x, enemy.xDir)) {
+      enemy.xDir = enemy.xDir * -1
+    } else {
+      if (enemy.recordTime >= EnemyChangeDirInterval) {
+        enemy.recordTime = 0
+        enemy.xDir = Math.random() > 0.5 ? 1 : -1
+      }
     }
-    if (enemy.xDir === true) { enemy.x  += enemyMoveSpeedX }
-    else { enemy.x -= enemyMoveSpeedX }
-  }
+    enemy.x += (enemyMoveSpeedX * enemy.xDir);
 
-  if(enemy.y <= minY) { enemy.y += enemyMoveSpeedY; enemy.yDir = false}
-  else if(enemy.y >= maxY) { enemy.y -= enemyMoveSpeedY; enemy.yDir = true}
-  else {
-    if (enemy.yDir === false) { enemy.y += enemyMoveSpeedY }
-    else { enemy.y -= enemyMoveSpeedY }
+    if (isReachEdge([minY, maxY], enemy.y, enemy.yDir)) {
+      enemy.yDir = enemy.yDir * -1
+    }
+    enemy.y += (enemyMoveSpeedY * enemy.yDir);
   }
 }
 
@@ -155,7 +154,7 @@ export const selfBulletMove = (selfBullets, enemies, score) => {
     // console.log('[in ticker] shoot selfBullets count', len)
     for (let i = len - 1; i >= 0; i--) {
       const bullet = selfBullets[i]
-      if (bullet.y < -bullet.height) { // 到达顶部
+      if (isReachEdge([-bulletHeight], bullet.y, -1)) { // 到达顶部
         selfBullets.splice(i, 1)
       } else {
         bullet.y -= selfBulletSpeed
@@ -190,7 +189,7 @@ export const enemyBulletMove = (enemyBullets, selfBullets, score) => {
     // console.log('[in ticker] shoot enemyBullets count', len)
     for (let i = len - 1; i >= 0; i--) {
       const bullet = enemyBullets[i]
-      if (bullet.y > stageHeight) { // 到达底部
+      if (isReachEdge([0, stageHeight], bullet.y, 1)) { // 到达底部
         enemyBullets.splice(i, 1)
       } else {
         bullet.y += enemyBulletSpeed
