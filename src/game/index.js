@@ -3,6 +3,7 @@
 import * as PIXI from 'pixi.js'
 import { handleKeydown, handleKeyup, hittingDetect, addInterval, addTicker } from '../utils'
 import keyboardMovePlane, { isReachEdge } from './keyboardMovePlane'
+import moveBullets from './moveBullets'
 import config from './config'
 const {
   stageWidth, stageHeight,
@@ -139,7 +140,6 @@ export const selfBulletShoot = (plane, selfBullets) => {
   })
   addTicker(handleTicker)
 }
-
 const addBullet = (plane, selfBullets) => {
   let x = plane.x + (plane.width / 2 - bulletWidth / 2.3)
   let y = plane.y - bulletHeight / 2.5
@@ -147,24 +147,13 @@ const addBullet = (plane, selfBullets) => {
     x, y, width: bulletWidth, height: bulletHeight
   })
 }
+
 // 我方子弹移动
 export const selfBulletMove = (selfBullets, enemies, score) => {
-  const shoot = () => {
-    const len = selfBullets.length
-    // console.log('[in ticker] shoot selfBullets count', len)
-    for (let i = len - 1; i >= 0; i--) {
-      const bullet = selfBullets[i]
-      if (isReachEdge([-bulletHeight], bullet.y, -1)) { // 到达顶部
-        selfBullets.splice(i, 1)
-      } else {
-        bullet.y -= selfBulletSpeed
-        if (detectSelfBulletTouchEnemyPlane(bullet, enemies, score)) { // 检测碰撞
-          selfBullets.splice(i, 1)
-        }
-      }
-    }
+  const detectDestroy = (bullet) => {
+    return detectSelfBulletTouchEnemyPlane(bullet, enemies, score)
   }
-  addTicker(shoot)
+  addTicker(() => { moveBullets(selfBullets, -1, selfBulletSpeed, detectDestroy) })
 }
 
 // 敌方定时发射子弹
@@ -184,22 +173,10 @@ export const enemyBulletShoot = (enemies, enemyBullets) => {
 
 // 敌方子弹移动
 export const enemyBulletMove = (enemyBullets, selfBullets, score) => {
-  const shoot = () => {
-    const len = enemyBullets.length
-    // console.log('[in ticker] shoot enemyBullets count', len)
-    for (let i = len - 1; i >= 0; i--) {
-      const bullet = enemyBullets[i]
-      if (isReachEdge([0, stageHeight], bullet.y, 1)) { // 到达底部
-        enemyBullets.splice(i, 1)
-      } else {
-        bullet.y += enemyBulletSpeed
-        if (detectEnemyBulletTouchSelfBullets(bullet, selfBullets, score)) { // 检测碰撞
-          enemyBullets.splice(i, 1)
-        }
-      }
-    }
+  const detectDestroy = (bullet) => {
+    return detectEnemyBulletTouchSelfBullets(bullet, selfBullets, score) // 检测碰撞
   }
-  addTicker(shoot)
+  addTicker(() => { moveBullets(enemyBullets, 1, enemyBulletSpeed, detectDestroy) })
 }
 
 export const detectGameOver = (plane, enemies, enemyBullets, gameover) => {
