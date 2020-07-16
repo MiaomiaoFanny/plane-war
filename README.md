@@ -1,5 +1,22 @@
 # plane-war
+
 Vue3+canvas 实现飞机大战小游戏
+
+## 启动
+
+1. 构建
+
+```shell
+npm run build
+```
+
+2. 启动服务
+
+```shell
+npm run serve
+```
+
+3. 访问 http://localhost:8080
 
 ## 目标: 在canvas上实现飞机大战
 
