@@ -16,7 +16,7 @@ npm run build
 npm run serve
 ```
 
-3. 访问 http://localhost:8080
+3. 访问 http://localhost:8080 线上地址 [飞机大战](https://miaomiaofanny.github.io/plane-war/)
 
 ## 目标: 在canvas上实现飞机大战
 
