@@ -16,7 +16,7 @@ npm run build
 npm run serve
 ```
 
-3. 访问 http://localhost:8080 线上地址 [飞机大战](https://miaomiaofanny.github.io/plane-war/)
+3. 访问 http://localhost:8080 线上地址 [github飞机大战](https://miaomiaofanny.github.io/plane-war/) / [gitee飞机大战](https://fannia.gitee.io/plane-war/)
 
 ## 目标: 在canvas上实现飞机大战
 
@@ -69,6 +69,7 @@ npm run serve
   - [x] 提出敌机移动逻辑
   - [x] 提出键盘控制本机移动逻辑
 - [ ] 测试
+- [x] 部署到git pages [参考文章](https://www.cnblogs.com/Marco-hui/p/12155936.html)
 
 ## 游戏界面
 
@@ -77,20 +78,3 @@ npm run serve
 ![GamePage](./assets/game_page.png)
 
 ![EndPage](./assets/end_page.png)
-
-## CI lifeCycle
-
-```bash
-(OPTIONAL Install) apt addons
-(OPTIONAL Install) cache components
-before_install
-install
-before_script
-script
-(OPTIONAL) before_cache (if and only if caching is effective)
-after_success or after_failure
-(OPTIONAL) before_deploy (if and only if deployment is active)
-(OPTIONAL) deploy
-(OPTIONAL) after_deploy (if and only if deployment is active)
-after_script
-```
