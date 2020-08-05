@@ -1,5 +1,6 @@
 const path = require('path')
 module.exports = {
+  mode: 'none',
   entry: path.resolve(__dirname, './main.js'),
   output: {
     filename: 'bundle.js',
